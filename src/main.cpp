@@ -1,11 +1,14 @@
-#include "core/Dither.hpp"
 #include "core/Image.hpp"
 #include "core/ImageIO.hpp"
-#include "core/Quantize.hpp"
+#include "core/Params.hpp"
+#include "core/Pipeline.hpp"
 
 int main() {
   Image src = ImageIO::load("../assets/in.jpg");
   Image dst;
-  quantize_ordered_dither(src, dst, 8, 8, 8, 2.0f);
+
+  Params params{};
+  run_cpu_pipeline(src, dst, params);
+
   ImageIO::save("../assets/out.jpg", dst);
 }
