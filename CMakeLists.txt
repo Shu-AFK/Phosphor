@@ -21,6 +21,11 @@ set(IMGUI_SOURCES
 
 file(GLOB_RECURSE SRC_FILES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
+add_library(glad
+    external/glad/src/glad.c
+)
+target_include_directories(glad PUBLIC external/glad/include)
+
 add_executable(phosphor
   ${SRC_FILES}
   ${IMGUI_SOURCES}
@@ -34,6 +39,7 @@ target_include_directories(phosphor PRIVATE
 )
 
 target_link_libraries(phosphor PRIVATE
+  glad
   ${GLFW_LIBRARIES}
   OpenGL::GL
 )

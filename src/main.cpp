@@ -1,3 +1,4 @@
+#include "app/App.hpp"
 #include "core/Image.hpp"
 #include "core/ImageIO.hpp"
 #include "core/Params.hpp"
@@ -11,4 +12,7 @@ int main() {
   run_cpu_pipeline(src, dst, params);
 
   ImageIO::save("../assets/out.jpg", dst);
+
+  App app;
+  app.run();
 }
