@@ -1,10 +1,11 @@
 #include "App.hpp"
 
+#include "UiPanels.hpp"
+
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <imgui.h>
 
-#include <iostream>
 #include <stdexcept>
 
 App::App() {
@@ -63,9 +64,8 @@ int App::run() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::Begin("Phosphor");
-    ImGui::Text("Window + ImGui working.");
-    ImGui::End();
+    ui::draw_window(_state);
+    ;
 
     ImGui::Render();
 
