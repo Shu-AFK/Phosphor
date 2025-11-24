@@ -8,10 +8,28 @@
 
 #include "imgui.h"
 
+#include <algorithm>
 #include <stdexcept>
 #include <variant>
 
-void ui::draw_main_section(AppState &state) {}
+void ui::draw_main_section(AppState &state) {
+  if (ImGui::BeginTable("MainSplit", 2, ImGuiTableFlags_SizingStretchProp)) {
+    // 70% preview 30% controls
+    ImGui::TableSetupColumn("Preview", ImGuiTableColumnFlags_WidthStretch,
+                            0.8f);
+    ImGui::TableSetupColumn("Controls", ImGuiTableColumnFlags_WidthStretch,
+                            0.2f);
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    ui::draw_preview_section(state);
+
+    ImGui::TableSetColumnIndex(1);
+    ui::draw_parameters_section(state);
+
+    ImGui::EndTable();
+  }
+}
 
 void ui::draw_file_section(AppState &state) {
   if (ImGui::BeginTable("filetable", 2, ImGuiTableFlags_SizingStretchProp)) {
@@ -36,6 +54,7 @@ void ui::draw_file_section(AppState &state) {
                                 state.original = ImageIO::load(path);
                                 state.processed = state.original;
                                 state.imageLoaded = true;
+                                state.needsReprocess = true;
                               } catch (std::runtime_error &e) {
                                 state.errors.push(e.what());
                               }
@@ -71,9 +90,36 @@ void ui::draw_file_section(AppState &state) {
   }
 }
 
-void ui::draw_preview_section(AppState &state) {}
+void ui::draw_preview_section(AppState &state) {
+  ImGui::BeginChild("Preview Panel");
 
-void ui::draw_parameters_section(AppState &state) {}
+  if (!state.imageLoaded) {
+    ImGui::Text("No image loaded");
+    ImGui::EndChild();
+    return;
+  }
+
+  if (state.needsReprocess) {
+    state.previewTexture->upload_from_image(state.processed);
+    state.needsReprocess = false;
+  }
+
+  float pW = state.processed.width();
+  float pH = state.processed.height();
+  ImVec2 avail = ImGui::GetContentRegionAvail();
+
+  float scale = std::min(avail.x / pW, avail.y / pH);
+  ImVec2 drawSize(pW * scale, pH * scale);
+
+  ImGui::Image((ImTextureID)state.previewTexture->id(), drawSize);
+  ImGui::EndChild();
+}
+
+void ui::draw_parameters_section(AppState &state) {
+  ImGui::BeginChild("Control Panel");
+
+  ImGui::EndChild();
+}
 
 void ui::draw_errors(AppState &state) {
   if (state.errors.should_open_popup()) {
@@ -110,10 +156,8 @@ void ui::draw_window(AppState &state) {
 
   ImGui::Begin("Phosphor", nullptr, windowFlags);
 
-  ui::draw_main_section(state);
   ui::draw_file_section(state);
-  ui::draw_preview_section(state);
-  ui::draw_parameters_section(state);
+  ui::draw_main_section(state);
   ui::draw_errors(state);
 
   ImGui::End();

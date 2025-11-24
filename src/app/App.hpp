@@ -16,6 +16,6 @@ public:
 
 private:
   GLFWwindow *_window = nullptr;
-  struct AppState _state;
+  AppState _state;
   NFD::Guard _guard;
 };

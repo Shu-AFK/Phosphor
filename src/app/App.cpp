@@ -1,11 +1,13 @@
 #include "App.hpp"
 
 #include "UiPanels.hpp"
+#include "gpu/Texture2D.hpp"
 
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <imgui.h>
 
+#include <memory>
 #include <stdexcept>
 
 App::App() {
@@ -43,6 +45,8 @@ App::App() {
 
   ImGui_ImplGlfw_InitForOpenGL(_window, true);
   ImGui_ImplOpenGL3_Init("#version 330");
+
+  _state.previewTexture = std::make_unique<Texture2D>();
 }
 
 App::~App() {

@@ -2,8 +2,10 @@
 
 #include "core/Image.hpp"
 #include "core/Params.hpp"
+#include "gpu/Texture2D.hpp"
 #include "util/ErrorManager.hpp"
 
+#include <memory>
 #include <string>
 
 struct AppState {
@@ -13,6 +15,8 @@ struct AppState {
   Image original;
   Image processed;
   Params params;
+
+  std::unique_ptr<Texture2D> previewTexture;
 
   bool imageLoaded = false;
   bool needsReprocess = false;
