@@ -3,6 +3,7 @@
 #include "Dialog.hpp"
 
 #include "core/ImageIO.hpp"
+#include "core/Pipeline.hpp"
 #include "util/FileUtils.hpp"
 #include "util/VariantUtils.hpp"
 
@@ -101,6 +102,8 @@ void ui::draw_preview_section(AppState &state) {
   }
 
   if (state.needsReprocess) {
+    run_cpu_pipeline(state.original, state.processed, state.params);
+
     state.previewTexture->upload_from_image(state.processed);
     state.needsReprocess = false;
   }
@@ -118,6 +121,31 @@ void ui::draw_preview_section(AppState &state) {
 
 void ui::draw_parameters_section(AppState &state) {
   ImGui::BeginChild("Control Panel");
+
+  ImGui::Text("Quantization");
+
+  if (ImGui::SliderInt("Levels R", &state.params.levelsR, 1, 32))
+    state.needsReprocess = true;
+  if (ImGui::SliderInt("Levels G", &state.params.levelsG, 1, 32))
+    state.needsReprocess = true;
+  if (ImGui::SliderInt("Levels B", &state.params.levelsB, 1, 32))
+    state.needsReprocess = true;
+
+  ImGui::Separator();
+  ImGui::Text("Dithering");
+
+  static const char *ditherNames[] = {"None", "Ordered"};
+  int mode = (int)state.params.ditherMode;
+
+  if (ImGui::Combo("Dither Mode", &mode, ditherNames,
+                   IM_ARRAYSIZE(ditherNames))) {
+    state.params.ditherMode = (DitherMode)mode;
+    state.needsReprocess = true;
+  }
+
+  if (ImGui::SliderFloat("Dither Strength", &state.params.ditherStrength, 0.0f,
+                         2.0f))
+    state.needsReprocess = true;
 
   ImGui::EndChild();
 }
