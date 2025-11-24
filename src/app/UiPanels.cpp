@@ -7,6 +7,7 @@
 #include "util/VariantUtils.hpp"
 
 #include "imgui.h"
+#include <GLFW/glfw3.h>
 
 #include <algorithm>
 #include <stdexcept>
@@ -16,9 +17,9 @@ void ui::draw_main_section(AppState &state) {
   if (ImGui::BeginTable("MainSplit", 2, ImGuiTableFlags_SizingStretchProp)) {
     // 70% preview 30% controls
     ImGui::TableSetupColumn("Preview", ImGuiTableColumnFlags_WidthStretch,
-                            0.8f);
+                            0.7f);
     ImGui::TableSetupColumn("Controls", ImGuiTableColumnFlags_WidthStretch,
-                            0.2f);
+                            0.3f);
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
@@ -142,6 +143,18 @@ void ui::draw_errors(AppState &state) {
 
 void ui::draw_window(AppState &state) {
   ImGuiIO &io = ImGui::GetIO();
+
+  int fbW, fbH;
+  glfwGetFramebufferSize(glfwGetCurrentContext(), &fbW, &fbH);
+
+  static int lastW = 0, lastH = 0;
+
+  if ((fbW != lastW || fbH != lastH) && state.imageLoaded) {
+    state.needsReprocess = true;
+  }
+
+  lastW = fbW;
+  lastH = fbH;
 
   ImGui::SetNextWindowPos(ImVec2(0, 0));
   ImGui::SetNextWindowSize(io.DisplaySize);
