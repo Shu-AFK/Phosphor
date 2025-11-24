@@ -115,7 +115,23 @@ void ui::draw_preview_section(AppState &state) {
   float scale = std::min(avail.x / pW, avail.y / pH);
   ImVec2 drawSize(pW * scale, pH * scale);
 
+  static float zoom_factor = 1.0f;
+
+  // Zoom controls
+  if (ImGui::Button("Zoom In")) {
+    zoom_factor += 0.1f;
+    zoom_factor = std::clamp(zoom_factor, 1.0f, 5.0f);
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Zoom Out")) {
+    zoom_factor -= 0.1f;
+    zoom_factor = std::clamp(zoom_factor, 1.0f, 5.0f);
+  }
+
+  drawSize.x *= zoom_factor;
+  drawSize.y *= zoom_factor;
   ImGui::Image((ImTextureID)state.previewTexture->id(), drawSize);
+
   ImGui::EndChild();
 }
 
@@ -130,6 +146,24 @@ void ui::draw_parameters_section(AppState &state) {
     state.needsReprocess = true;
   if (ImGui::SliderInt("Levels B", &state.params.levelsB, 1, 32))
     state.needsReprocess = true;
+
+  static bool lockChannels = true;
+  if (lockChannels) {
+    int shared = state.params.levelsR;
+    if (ImGui::SliderInt("Levels RGB", &shared, 1, 32)) {
+      state.params.levelsR = shared;
+      state.params.levelsG = shared;
+      state.params.levelsB = shared;
+      state.needsReprocess = true;
+    }
+  } else {
+    if (ImGui::SliderInt("Levels R", &state.params.levelsR, 1, 32))
+      state.needsReprocess = true;
+    if (ImGui::SliderInt("Levels G", &state.params.levelsG, 1, 32))
+      state.needsReprocess = true;
+    if (ImGui::SliderInt("Levels B", &state.params.levelsB, 1, 32))
+      state.needsReprocess = true;
+  }
 
   ImGui::Separator();
   ImGui::Text("Dithering");
