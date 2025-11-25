@@ -44,6 +44,7 @@ App::App() {
 
   ui::load_fonts();
   ui::apply_modern_style();
+  ImGui::GetStyle().ScaleAllSizes(0.8f);
 
   ImGui_ImplGlfw_InitForOpenGL(_window, true);
   ImGui_ImplOpenGL3_Init("#version 330");
@@ -68,10 +69,13 @@ int App::run() {
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
+
+    ImGuiIO &io = ImGui::GetIO();
+    io.FontGlobalScale = 0.8f;
+
     ImGui::NewFrame();
 
     ui::draw_window(_state);
-    ;
 
     ImGui::Render();
 

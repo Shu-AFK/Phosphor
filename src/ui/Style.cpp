@@ -14,7 +14,7 @@ constexpr ImVec4 color_from_hex(float r, float g, float b, float a = 1.0f) {
 
 void load_fonts() {
   ImGuiIO &io = ImGui::GetIO();
-  const std::string fontPath = "external/imgui/misc/fonts/Roboto-Medium.ttf";
+  const std::string fontPath = "../assets/Inter_18pt-Medium.ttf";
   constexpr float fontSize = 17.0f;
 
   io.Fonts->Clear();

@@ -112,25 +112,63 @@ void ui::draw_preview_section(AppState &state) {
   float pH = state.processed.height();
   ImVec2 avail = ImGui::GetContentRegionAvail();
 
-  float scale = std::min(avail.x / pW, avail.y / pH);
-  ImVec2 drawSize(pW * scale, pH * scale);
+  float baseScale = std::min(avail.x / pW, avail.y / pH);
+  ImVec2 drawSize(pW * baseScale, pH * baseScale);
 
   static float zoom_factor = 1.0f;
+  static ImVec2 uvCenter = ImVec2(0.5f, 0.5f);
 
-  // Zoom controls
-  if (ImGui::Button("Zoom In")) {
-    zoom_factor += 0.1f;
+  ImGui::Text("Zoom");
+  ImGui::SameLine();
+  if (ImGui::Button("In")) {
+    zoom_factor *= 1.1f;
     zoom_factor = std::clamp(zoom_factor, 1.0f, 5.0f);
   }
   ImGui::SameLine();
-  if (ImGui::Button("Zoom Out")) {
-    zoom_factor -= 0.1f;
+  if (ImGui::Button("Out")) {
+    zoom_factor /= 1.1f;
     zoom_factor = std::clamp(zoom_factor, 1.0f, 5.0f);
+    if (zoom_factor == 1.0f)
+      uvCenter = ImVec2(0.5f, 0.5f);
   }
 
-  drawSize.x *= zoom_factor;
-  drawSize.y *= zoom_factor;
-  ImGui::Image((ImTextureID)state.previewTexture->id(), drawSize);
+  zoom_factor = std::clamp(zoom_factor, 1.0f, 5.0f);
+
+  float halfSpan = 0.5f / zoom_factor;
+  ImVec2 uv0(uvCenter.x - halfSpan, uvCenter.y - halfSpan);
+  ImVec2 uv1(uvCenter.x + halfSpan, uvCenter.y + halfSpan);
+
+  uv0.x = std::clamp(uv0.x, 0.0f, 1.0f);
+  uv0.y = std::clamp(uv0.y, 0.0f, 1.0f);
+  uv1.x = std::clamp(uv1.x, 0.0f, 1.0f);
+  uv1.y = std::clamp(uv1.y, 0.0f, 1.0f);
+
+  ImVec2 imagePos = ImGui::GetCursorScreenPos();
+  ImGui::Image((ImTextureID)state.previewTexture->id(), drawSize, uv0, uv1);
+
+  ImGuiIO &io = ImGui::GetIO();
+  bool ctrl = io.KeyCtrl;
+
+  bool plusPressed = ImGui::IsKeyPressed(ImGuiKey_Equal) ||
+                     ImGui::IsKeyPressed(ImGuiKey_KeypadAdd);
+
+  if (ImGui::IsItemHovered() && ctrl && plusPressed) {
+    ImVec2 mouse = ImGui::GetMousePos();
+    ImVec2 local((mouse.x - imagePos.x) / drawSize.x,
+                 (mouse.y - imagePos.y) / drawSize.y);
+
+    local.x = std::clamp(local.x, 0.0f, 1.0f);
+    local.y = std::clamp(local.y, 0.0f, 1.0f);
+
+    ImVec2 currentUv0 = uv0;
+    ImVec2 currentUv1 = uv1;
+    ImVec2 uvUnderMouse(currentUv0.x + local.x * (currentUv1.x - currentUv0.x),
+                        currentUv0.y + local.y * (currentUv1.y - currentUv0.y));
+
+    zoom_factor *= 1.1f;
+    zoom_factor = std::clamp(zoom_factor, 1.0f, 5.0f);
+    uvCenter = uvUnderMouse;
+  }
 
   ImGui::EndChild();
 }
