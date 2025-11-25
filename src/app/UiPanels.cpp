@@ -140,15 +140,7 @@ void ui::draw_parameters_section(AppState &state) {
 
   ImGui::Text("Quantization");
 
-  if (ImGui::SliderInt("Levels R", &state.params.levelsR, 1, 32))
-    state.needsReprocess = true;
-  if (ImGui::SliderInt("Levels G", &state.params.levelsG, 1, 32))
-    state.needsReprocess = true;
-  if (ImGui::SliderInt("Levels B", &state.params.levelsB, 1, 32))
-    state.needsReprocess = true;
-
-  static bool lockChannels = true;
-  if (lockChannels) {
+  if (state.lockChannels) {
     int shared = state.params.levelsR;
     if (ImGui::SliderInt("Levels RGB", &shared, 1, 32)) {
       state.params.levelsR = shared;
@@ -164,6 +156,7 @@ void ui::draw_parameters_section(AppState &state) {
     if (ImGui::SliderInt("Levels B", &state.params.levelsB, 1, 32))
       state.needsReprocess = true;
   }
+  ImGui::Checkbox("Lock Channels", &state.lockChannels);
 
   ImGui::Separator();
   ImGui::Text("Dithering");

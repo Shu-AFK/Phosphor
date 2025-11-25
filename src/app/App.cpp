@@ -2,6 +2,7 @@
 
 #include "UiPanels.hpp"
 #include "gpu/Texture2D.hpp"
+#include "ui/Style.hpp"
 
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -41,7 +42,8 @@ App::App() {
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
 
-  ImGui::StyleColorsDark();
+  ui::load_fonts();
+  ui::apply_modern_style();
 
   ImGui_ImplGlfw_InitForOpenGL(_window, true);
   ImGui_ImplOpenGL3_Init("#version 330");

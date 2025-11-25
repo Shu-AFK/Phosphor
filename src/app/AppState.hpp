@@ -20,6 +20,7 @@ struct AppState {
 
   bool imageLoaded = false;
   bool needsReprocess = false;
+  bool lockChannels = true;
 
   ErrorManager errors;
 };
