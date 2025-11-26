@@ -1,5 +1,6 @@
 #include "Filter.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
@@ -7,7 +8,7 @@
 namespace {
 
 inline void apply_filter_mode_pixel(uint8_t *dst, const uint8_t *src, int c,
-                                    FilterMode mode) {
+                                    FilterMode mode, float intensity) {
 
   switch (mode) {
   case FilterMode::None:
@@ -21,23 +22,32 @@ inline void apply_filter_mode_pixel(uint8_t *dst, const uint8_t *src, int c,
     break;
   }
 
-  case FilterMode::RedChannel:
-    dst[0] = src[0];
+  case FilterMode::RedChannel: {
+    float v = src[0] * intensity;
+    uint8_t r = static_cast<uint8_t>(std::round(v));
+    dst[0] = r;
     dst[1] = 0;
     dst[2] = 0;
     break;
+  }
 
-  case FilterMode::GreenChannel:
+  case FilterMode::GreenChannel: {
+    float v = src[1] * intensity;
+    uint8_t g = static_cast<uint8_t>(std::round(v));
     dst[0] = 0;
-    dst[1] = src[1];
+    dst[1] = g;
     dst[2] = 0;
     break;
+  }
 
-  case FilterMode::BlueChannel:
+  case FilterMode::BlueChannel: {
+    float v = src[2] * intensity;
+    uint8_t b = static_cast<uint8_t>(std::round(v));
     dst[0] = 0;
     dst[1] = 0;
-    dst[2] = src[2];
+    dst[2] = b;
     break;
+  }
   }
 
   if (c == 4)
@@ -46,7 +56,8 @@ inline void apply_filter_mode_pixel(uint8_t *dst, const uint8_t *src, int c,
 
 } // namespace
 
-void apply_channel_filter(const Image &src, Image &dst, FilterMode mode) {
+void apply_channel_filter(const Image &src, Image &dst, FilterMode mode,
+                          float intensity) {
   if (mode == FilterMode::None) {
     return;
   }
@@ -63,6 +74,8 @@ void apply_channel_filter(const Image &src, Image &dst, FilterMode mode) {
   const uint8_t *src_data = src.data();
   uint8_t *dst_data = dst.data();
 
+  intensity = std::clamp(intensity, 0.1f, 1.0f);
+
   for (int y = 0; y < h; ++y) {
     for (int x = 0; x < w; ++x) {
       int idx = (y * w + x) * c;
@@ -70,7 +83,8 @@ void apply_channel_filter(const Image &src, Image &dst, FilterMode mode) {
       const uint8_t *source_pointer = src_data + idx;
       uint8_t *destination_pointer = dst_data + idx;
 
-      apply_filter_mode_pixel(destination_pointer, source_pointer, c, mode);
+      apply_filter_mode_pixel(destination_pointer, source_pointer, c, mode,
+                              intensity);
     }
   }
 }

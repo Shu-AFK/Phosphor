@@ -10,6 +10,7 @@ enum class DitherMode {
 struct Params {
   // Filter
   FilterMode filterMode = FilterMode::None;
+  float channelIntensity = 0.45f;
 
   // Quantization
   int levelsR = 4;

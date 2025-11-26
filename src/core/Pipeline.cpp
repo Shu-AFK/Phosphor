@@ -15,7 +15,7 @@ void run_cpu_pipeline(const Image &src, Image &dst, const Params &params) {
   case FilterMode::RedChannel:
   case FilterMode::GreenChannel:
   case FilterMode::BlueChannel:
-    apply_channel_filter(src, dst, params.filterMode);
+    apply_channel_filter(src, dst, params.filterMode, params.channelIntensity);
     break;
 
   default:

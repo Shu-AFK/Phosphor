@@ -189,6 +189,11 @@ void ui::draw_parameters_section(AppState &state) {
     state.needsReprocess = true;
   }
 
+  if (ImGui::SliderFloat("Intensity", &state.params.channelIntensity, 0.1f,
+                         1.0f)) {
+    state.needsReprocess = true;
+  }
+
   ImGui::Separator();
   ImGui::Text("Quantization");
 
