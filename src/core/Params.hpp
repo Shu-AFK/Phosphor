@@ -1,11 +1,16 @@
 #pragma once
 
+#include "Filter.hpp"
+
 enum class DitherMode {
   None,
   Ordered4x4,
 };
 
 struct Params {
+  // Filter
+  FilterMode filterMode = FilterMode::None;
+
   // Quantization
   int levelsR = 4;
   int levelsG = 4;

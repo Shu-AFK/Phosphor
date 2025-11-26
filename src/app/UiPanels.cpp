@@ -2,6 +2,7 @@
 
 #include "Dialog.hpp"
 
+#include "core/Filter.hpp"
 #include "core/ImageIO.hpp"
 #include "core/Pipeline.hpp"
 #include "util/FileUtils.hpp"
@@ -176,6 +177,19 @@ void ui::draw_preview_section(AppState &state) {
 void ui::draw_parameters_section(AppState &state) {
   ImGui::BeginChild("Control Panel");
 
+  ImGui::Text("Filters");
+
+  static const char *filterNames[] = {"None", "Greyscale", "Red Channel",
+                                      "Green Channel", "Blue Channel"};
+  int filterMode = (int)state.params.filterMode;
+
+  if (ImGui::Combo("Filter Mode", &filterMode, filterNames,
+                   IM_ARRAYSIZE(filterNames))) {
+    state.params.filterMode = (FilterMode)filterMode;
+    state.needsReprocess = true;
+  }
+
+  ImGui::Separator();
   ImGui::Text("Quantization");
 
   if (state.lockChannels) {
@@ -200,11 +214,11 @@ void ui::draw_parameters_section(AppState &state) {
   ImGui::Text("Dithering");
 
   static const char *ditherNames[] = {"None", "Ordered"};
-  int mode = (int)state.params.ditherMode;
+  int ditherMode = (int)state.params.ditherMode;
 
-  if (ImGui::Combo("Dither Mode", &mode, ditherNames,
+  if (ImGui::Combo("Dither Mode", &ditherMode, ditherNames,
                    IM_ARRAYSIZE(ditherNames))) {
-    state.params.ditherMode = (DitherMode)mode;
+    state.params.ditherMode = (DitherMode)ditherMode;
     state.needsReprocess = true;
   }
 
