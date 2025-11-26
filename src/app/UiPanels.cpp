@@ -189,9 +189,12 @@ void ui::draw_parameters_section(AppState &state) {
     state.needsReprocess = true;
   }
 
-  if (ImGui::SliderFloat("Intensity", &state.params.channelIntensity, 0.1f,
-                         1.0f)) {
-    state.needsReprocess = true;
+  if (state.params.filterMode != FilterMode::None &&
+      state.params.filterMode != FilterMode::Grayscale) {
+    if (ImGui::SliderFloat("Intensity", &state.params.channelIntensity, 0.1f,
+                           1.0f)) {
+      state.needsReprocess = true;
+    }
   }
 
   ImGui::Separator();
