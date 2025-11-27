@@ -1,8 +1,10 @@
 #include "Dither.hpp"
 
+#include "Quantize.hpp"
+#include "core/Params.hpp"
+
 #include <algorithm>
 #include <assert.h>
-#include <cmath>
 
 namespace {
 static const int BAYER4[4][4] = {
@@ -20,26 +22,28 @@ inline float bayer_threshold_4x4(int x, int y) {
   return (BAYER4[ty][tx] + 0.5f) / 16.0f;
 }
 
-float quantize_dither_channel(float val, int level, int x, int y,
-                              float ditherStrength) {
-  float v = val / 255.0f;
+inline Vec3f apply_ordered_dither_offset(const Vec3f &c, int levelsR,
+                                         int levelsG, int levelsB, int x, int y,
+                                         float ditherStrength) {
+  float t = bayer_threshold_4x4(x, y);        // 0..1
+  float offset = (t - 0.5f) * ditherStrength; // -0.5..0.5 scaled by strength
 
-  float t = bayer_threshold_4x4(x, y); // 0..1
-  float offset = t - 0.5f;             // -0.5..0.5
+  float rangeR = 1.0f / float(levelsR);
+  float rangeG = 1.0f / float(levelsG);
+  float rangeB = 1.0f / float(levelsB);
 
-  float nv = v + offset * (ditherStrength / level);
-  nv = std::clamp(nv, 0.0f, 1.0f);
+  Vec3f out;
+  out.r = std::clamp((c.r / 255.0f) + offset * rangeR, 0.0f, 1.0f) * 255.0f;
+  out.g = std::clamp((c.g / 255.0f) + offset * rangeG, 0.0f, 1.0f) * 255.0f;
+  out.b = std::clamp((c.b / 255.0f) + offset * rangeB, 0.0f, 1.0f) * 255.0f;
 
-  float scaled = nv * (level - 1);
-  int r = static_cast<int>(std::round(scaled));
-
-  float out = r * (255.0f / (level - 1));
-  return std::clamp(out, 0.0f, 255.0f);
+  return out;
 }
 } // namespace
 
-void quantize_ordered_dither(const ImageF &src, ImageF &dst, int levelsR,
-                             int levelsG, int levelsB, float ditherStrength) {
+void quantize_ordered_dither(const ImageF &src, ImageF &dst, QuantizeMode mode,
+                             int levelsR, int levelsG, int levelsB,
+                             float ditherStrength) {
   assert(src.channels() == 3 || src.channels() == 4);
 
   levelsR = std::clamp(levelsR, 2, 32);
@@ -54,19 +58,26 @@ void quantize_ordered_dither(const ImageF &src, ImageF &dst, int levelsR,
 
   for (int y = 0; y < h; ++y) {
     for (int x = 0; x < w; ++x) {
-      const Vec4f &source_pointer = src.at(x, y);
-      Vec4f &destination_pointer = dst.at(x, y);
 
-      destination_pointer.r = quantize_dither_channel(
-          source_pointer.r, levelsR, x, y, ditherStrength);
-      destination_pointer.g = quantize_dither_channel(
-          source_pointer.g, levelsG, x, y, ditherStrength);
-      destination_pointer.b = quantize_dither_channel(
-          source_pointer.b, levelsB, x, y, ditherStrength);
+      const Vec4f &s = src.at(x, y);
+      Vec4f &d = dst.at(x, y);
 
-      if (ch == 4) {
-        destination_pointer.a = source_pointer.a;
-      }
+      Vec3f rgb{s.r, s.g, s.b};
+
+      Vec3f perturbed = apply_ordered_dither_offset(
+          rgb, levelsR, levelsG, levelsB, x, y, ditherStrength);
+
+      Vec3f q =
+          mode == QuantizeMode::None
+              ? perturbed
+              : quantize_color(perturbed, mode, levelsR, levelsG, levelsB);
+
+      d.r = q.r;
+      d.g = q.g;
+      d.b = q.b;
+
+      if (ch == 4)
+        d.a = s.a;
     }
   }
 }

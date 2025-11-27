@@ -2,6 +2,11 @@
 
 #include "Filter.hpp"
 
+enum class QuantizeMode {
+  None,
+  UniformPerChannel,
+};
+
 enum class DitherMode {
   None,
   Ordered4x4,
@@ -13,11 +18,12 @@ struct Params {
   float channelIntensity = 0.45f;
 
   // Quantization
+  QuantizeMode quantizeMode = QuantizeMode::None;
   int levelsR = 4;
   int levelsG = 4;
   int levelsB = 4;
 
   // Dithering
-  DitherMode ditherMode = DitherMode::Ordered4x4;
+  DitherMode ditherMode = DitherMode::None;
   float ditherStrength = 1.0f;
 };

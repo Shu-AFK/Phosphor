@@ -73,29 +73,24 @@ void run_cpu_pipeline(const Image &src, Image &dst, const Params &params) {
   case FilterMode::GreenChannel:
   case FilterMode::BlueChannel:
     apply_channel_filter(floatSrc, floatDst, params.filterMode,
-                        params.channelIntensity);
+                         params.channelIntensity);
     break;
-
   default:
     assert(false && "Invalid filter mode");
     break;
   }
 
   ImageF tmp = floatDst;
-  switch (params.ditherMode) {
-  case DitherMode::None:
-    quantize_naive(tmp, floatDst, params.levelsR, params.levelsG,
-                   params.levelsB);
-    break;
 
-  case DitherMode::Ordered4x4:
-    quantize_ordered_dither(tmp, floatDst, params.levelsR, params.levelsG,
-                            params.levelsB, params.ditherStrength);
-    break;
-
-  default:
-    assert(false && "Invalid dither mode!");
-    break;
+  if (params.quantizeMode == QuantizeMode::None) {
+    /* no-op */
+  } else if (params.ditherMode == DitherMode::None) {
+    quantize_naive(tmp, floatDst, params.quantizeMode, params.levelsR,
+                   params.levelsG, params.levelsB);
+  } else {
+    quantize_ordered_dither(tmp, floatDst, params.quantizeMode, params.levelsR,
+                            params.levelsG, params.levelsB,
+                            params.ditherStrength);
   }
 
   dst = to_uint8_image(floatDst);

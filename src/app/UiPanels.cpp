@@ -4,6 +4,7 @@
 
 #include "core/Filter.hpp"
 #include "core/ImageIO.hpp"
+#include "core/Params.hpp"
 #include "core/Pipeline.hpp"
 #include "util/FileUtils.hpp"
 #include "util/VariantUtils.hpp"
@@ -200,6 +201,15 @@ void ui::draw_parameters_section(AppState &state) {
   ImGui::Separator();
   ImGui::Text("Quantization");
 
+  static const char *quantizeNames[] = {"None", "Uniform Per Channel"};
+  int quantizeMode = (int)state.params.quantizeMode;
+
+  if (ImGui::Combo("Quantize Mode", &quantizeMode, quantizeNames,
+                   IM_ARRAYSIZE(quantizeNames))) {
+    state.params.quantizeMode = (QuantizeMode)quantizeMode;
+    state.needsReprocess = true;
+  }
+
   if (state.lockChannels) {
     int shared = state.params.levelsR;
     if (ImGui::SliderInt("Levels RGB", &shared, 1, 32)) {
@@ -228,6 +238,10 @@ void ui::draw_parameters_section(AppState &state) {
                    IM_ARRAYSIZE(ditherNames))) {
     state.params.ditherMode = (DitherMode)ditherMode;
     state.needsReprocess = true;
+
+    if (state.params.quantizeMode == QuantizeMode::None) {
+      state.errors.push("You have to select a quantize mode for dithering!");
+    }
   }
 
   if (ImGui::SliderFloat("Dither Strength", &state.params.ditherStrength, 0.0f,
