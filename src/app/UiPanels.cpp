@@ -3,6 +3,7 @@
 #include "Dialog.hpp"
 
 #include "core/Filter.hpp"
+#include "core/Glow.hpp"
 #include "core/ImageIO.hpp"
 #include "core/Params.hpp"
 #include "core/Pipeline.hpp"
@@ -193,10 +194,38 @@ void ui::draw_parameters_section(AppState &state) {
   if (state.params.filter.mode != FilterMode::None &&
       state.params.filter.mode != FilterMode::Grayscale) {
     if (ImGui::SliderFloat("Intensity", &state.params.filter.channelIntensity,
-                           0.1f,
-                           1.0f)) {
+                           0.1f, 1.0f)) {
       state.needsReprocess = true;
     }
+  }
+
+  ImGui::Separator();
+  ImGui::Text("Glow");
+
+  static const char *blurNames[] = {"Gaussian"};
+  int blurMode = (int)state.params.glow.mode;
+  if (ImGui::Combo("Blur Mode", &blurMode, blurNames,
+                   IM_ARRAYSIZE(blurNames))) {
+    state.params.glow.mode = (GlowBlurMode)blurMode;
+    state.needsReprocess = true;
+  }
+
+  if (ImGui::SliderFloat("Threshold", &state.params.glow.threshold, 0.0f,
+                         1.0f)) {
+    state.needsReprocess = true;
+  }
+
+  if (ImGui::SliderFloat("Radius", &state.params.glow.radius, 1.0f, 40.0f)) {
+    state.needsReprocess = true;
+  }
+
+  if (ImGui::SliderFloat("Intensity", &state.params.glow.intensity, 0.0f,
+                         4.0f)) {
+    state.needsReprocess = true;
+  }
+
+  if (ImGui::Checkbox("Enable Glow", &state.params.glow.enabled)) {
+    state.needsReprocess = true;
   }
 
   ImGui::Separator();

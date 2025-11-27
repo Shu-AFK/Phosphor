@@ -7,6 +7,8 @@ struct Vec3f {
   float r = 0.0f;
   float g = 0.0f;
   float b = 0.0f;
+
+  Vec3f operator*(float s) const { return Vec3f{r * s, g * s, b * s}; }
 };
 
 struct Vec4f {
@@ -14,6 +16,8 @@ struct Vec4f {
   float g = 0.0f;
   float b = 0.0f;
   float a = 0.0f;
+
+  Vec4f operator*(float s) const { return Vec4f{r * s, g * s, b * s, a}; }
 };
 
 class ImageF {

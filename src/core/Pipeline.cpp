@@ -1,6 +1,7 @@
 #include "Pipeline.hpp"
 #include "Dither.hpp"
 #include "Filter.hpp"
+#include "Glow.hpp"
 #include "ImageF.hpp"
 #include "Quantize.hpp"
 
@@ -80,8 +81,12 @@ void run_cpu_pipeline(const Image &src, Image &dst, const Params &params) {
     break;
   }
 
-  ImageF tmp = floatDst;
+  if (params.glow.enabled) {
+    ImageF tmp = floatDst;
+    apply_glow(tmp, floatDst, params.glow);
+  }
 
+  ImageF tmp = floatDst;
   if (params.quantize.mode == QuantizeMode::None) {
     /* no-op */
   } else if (params.dither.mode == DitherMode::None) {

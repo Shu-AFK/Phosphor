@@ -5,7 +5,8 @@
 
 ImageF::ImageF(int w, int h, int c) : _w(w), _h(h), _c(c) {
   if (w <= 0 || h <= 0 || (c != 3 && c != 4)) {
-    throw std::invalid_argument("ImageF dimensions must be positive and channels must be 3 or 4");
+    throw std::invalid_argument(
+        "ImageF dimensions must be positive and channels must be 3 or 4");
   }
 
   _pixels.resize(static_cast<std::size_t>(w) * h);
