@@ -62,10 +62,10 @@ cmake --build build
 
 ## Project structure
 
-- `src/app/` — window loop, ImGui panels, dialogs, and parameter wiring.
-- `src/core/` — image I/O, channel filters, quantization, ordered dithering.
-- `src/gpu/` — minimal OpenGL texture wrapper for the preview.
-- `assets/` — fonts and logo.
+- `src/app/` - window loop, ImGui panels, dialogs, and parameter wiring.
+- `src/core/` - image I/O, channel filters, quantization, ordered dithering.
+- `src/gpu/` - minimal OpenGL texture wrapper for the preview.
+- `assets/` - fonts and logo.
 
 ## Rationale
 
