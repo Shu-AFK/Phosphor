@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Image.hpp"
+#include "ImageF.hpp"
 
-void quantize_naive(const Image &src, Image &dst, int levelsR, int levelsG,
+void quantize_naive(const ImageF &src, ImageF &dst, int levelsR, int levelsG,
                     int levelsB);

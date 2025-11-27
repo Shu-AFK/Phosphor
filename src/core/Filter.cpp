@@ -3,60 +3,52 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <cstdint>
 
 namespace {
 
-inline void apply_filter_mode_pixel(uint8_t *dst, const uint8_t *src, int c,
+inline void apply_filter_mode_pixel(Vec4f &dst, const Vec4f &src, int c,
                                     FilterMode mode, float intensity) {
-
+  dst = src;
   switch (mode) {
   case FilterMode::None:
     break;
 
   case FilterMode::Grayscale: {
     // luminance weights
-    float lum = src[0] * 0.299f + src[1] * 0.587f + src[2] * 0.114f;
-    uint8_t g = static_cast<uint8_t>(std::round(lum));
-    dst[0] = dst[1] = dst[2] = g;
+    float lum = src.r * 0.299f + src.g * 0.587f + src.b * 0.114f;
+    dst.r = dst.g = dst.b = lum;
     break;
   }
 
   case FilterMode::RedChannel: {
-    float v = src[0] * intensity;
-    uint8_t r = static_cast<uint8_t>(std::round(v));
-    dst[0] = r;
-    dst[1] = 0;
-    dst[2] = 0;
+    float v = src.r * intensity;
+    dst.r = v;
+    dst.g = 0.0f;
+    dst.b = 0.0f;
     break;
   }
 
   case FilterMode::GreenChannel: {
-    float v = src[1] * intensity;
-    uint8_t g = static_cast<uint8_t>(std::round(v));
-    dst[0] = 0;
-    dst[1] = g;
-    dst[2] = 0;
+    float v = src.g * intensity;
+    dst.r = 0.0f;
+    dst.g = v;
+    dst.b = 0.0f;
     break;
   }
 
   case FilterMode::BlueChannel: {
-    float v = src[2] * intensity;
-    uint8_t b = static_cast<uint8_t>(std::round(v));
-    dst[0] = 0;
-    dst[1] = 0;
-    dst[2] = b;
+    float v = src.b * intensity;
+    dst.r = 0.0f;
+    dst.g = 0.0f;
+    dst.b = v;
     break;
   }
   }
-
-  if (c == 4)
-    dst[3] = src[3];
 }
 
 } // namespace
 
-void apply_channel_filter(const Image &src, Image &dst, FilterMode mode,
+void apply_channel_filter(const ImageF &src, ImageF &dst, FilterMode mode,
                           float intensity) {
   if (mode == FilterMode::None) {
     return;
@@ -71,17 +63,12 @@ void apply_channel_filter(const Image &src, Image &dst, FilterMode mode,
   assert(dst.channels() == c);
   assert(c == 3 || c == 4);
 
-  const uint8_t *src_data = src.data();
-  uint8_t *dst_data = dst.data();
-
   intensity = std::clamp(intensity, 0.1f, 1.0f);
 
   for (int y = 0; y < h; ++y) {
     for (int x = 0; x < w; ++x) {
-      int idx = (y * w + x) * c;
-
-      const uint8_t *source_pointer = src_data + idx;
-      uint8_t *destination_pointer = dst_data + idx;
+      const Vec4f &source_pointer = src.at(x, y);
+      Vec4f &destination_pointer = dst.at(x, y);
 
       apply_filter_mode_pixel(destination_pointer, source_pointer, c, mode,
                               intensity);

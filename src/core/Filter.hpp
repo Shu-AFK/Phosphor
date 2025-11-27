@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Image.hpp"
+#include "ImageF.hpp"
 
 enum class FilterMode {
   None,
@@ -10,5 +10,5 @@ enum class FilterMode {
   BlueChannel
 };
 
-void apply_channel_filter(const Image &src, Image &dst, FilterMode mode,
+void apply_channel_filter(const ImageF &src, ImageF &dst, FilterMode mode,
                           float intensity);

@@ -20,8 +20,8 @@ inline float bayer_threshold_4x4(int x, int y) {
   return (BAYER4[ty][tx] + 0.5f) / 16.0f;
 }
 
-uint8_t quantize_dither_channel(int val, int level, int x, int y,
-                                float ditherStrength) {
+float quantize_dither_channel(float val, int level, int x, int y,
+                              float ditherStrength) {
   float v = val / 255.0f;
 
   float t = bayer_threshold_4x4(x, y); // 0..1
@@ -34,12 +34,11 @@ uint8_t quantize_dither_channel(int val, int level, int x, int y,
   int r = static_cast<int>(std::round(scaled));
 
   float out = r * (255.0f / (level - 1));
-  return static_cast<uint8_t>(
-      std::clamp(static_cast<int>(std::round(out)), 0, 255));
+  return std::clamp(out, 0.0f, 255.0f);
 }
 } // namespace
 
-void quantize_ordered_dither(const Image &src, Image &dst, int levelsR,
+void quantize_ordered_dither(const ImageF &src, ImageF &dst, int levelsR,
                              int levelsG, int levelsB, float ditherStrength) {
   assert(src.channels() == 3 || src.channels() == 4);
 
@@ -51,24 +50,22 @@ void quantize_ordered_dither(const Image &src, Image &dst, int levelsR,
   int h = src.height();
   int ch = src.channels();
 
-  dst = Image(w, h, ch);
-  const uint8_t *source_pixels = src.data();
-  uint8_t *destination_pixels = dst.data();
+  dst = ImageF(w, h, ch);
 
   for (int y = 0; y < h; ++y) {
     for (int x = 0; x < w; ++x) {
-      const uint8_t *source_pointer = source_pixels + (y * w + x) * ch;
-      uint8_t *destination_pointer = destination_pixels + (y * w + x) * ch;
+      const Vec4f &source_pointer = src.at(x, y);
+      Vec4f &destination_pointer = dst.at(x, y);
 
-      destination_pointer[0] = quantize_dither_channel(
-          source_pointer[0], levelsR, x, y, ditherStrength);
-      destination_pointer[1] = quantize_dither_channel(
-          source_pointer[1], levelsG, x, y, ditherStrength);
-      destination_pointer[2] = quantize_dither_channel(
-          source_pointer[2], levelsB, x, y, ditherStrength);
+      destination_pointer.r = quantize_dither_channel(
+          source_pointer.r, levelsR, x, y, ditherStrength);
+      destination_pointer.g = quantize_dither_channel(
+          source_pointer.g, levelsG, x, y, ditherStrength);
+      destination_pointer.b = quantize_dither_channel(
+          source_pointer.b, levelsB, x, y, ditherStrength);
 
       if (ch == 4) {
-        destination_pointer[3] = source_pointer[3];
+        destination_pointer.a = source_pointer.a;
       }
     }
   }
