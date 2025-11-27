@@ -10,5 +10,10 @@ enum class FilterMode {
   BlueChannel
 };
 
+struct FilterParams {
+  FilterMode mode = FilterMode::None;
+  float channelIntensity = 0.45f;
+};
+
 void apply_channel_filter(const ImageF &src, ImageF &dst, FilterMode mode,
                           float intensity);

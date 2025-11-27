@@ -1,7 +1,17 @@
 #pragma once
 
 #include "ImageF.hpp"
-#include "Params.hpp"
+enum class QuantizeMode {
+  None,
+  UniformPerChannel,
+};
+
+struct QuantizeParams {
+  QuantizeMode mode = QuantizeMode::None;
+  int levelsR = 4;
+  int levelsG = 4;
+  int levelsB = 4;
+};
 
 float quantize_channel_uniform(float value, int levels);
 

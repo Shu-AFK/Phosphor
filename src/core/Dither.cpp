@@ -1,8 +1,5 @@
 #include "Dither.hpp"
 
-#include "Quantize.hpp"
-#include "core/Params.hpp"
-
 #include <algorithm>
 #include <assert.h>
 

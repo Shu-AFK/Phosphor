@@ -182,17 +182,18 @@ void ui::draw_parameters_section(AppState &state) {
 
   static const char *filterNames[] = {"None", "Greyscale", "Red Channel",
                                       "Green Channel", "Blue Channel"};
-  int filterMode = (int)state.params.filterMode;
+  int filterMode = (int)state.params.filter.mode;
 
   if (ImGui::Combo("Filter Mode", &filterMode, filterNames,
                    IM_ARRAYSIZE(filterNames))) {
-    state.params.filterMode = (FilterMode)filterMode;
+    state.params.filter.mode = (FilterMode)filterMode;
     state.needsReprocess = true;
   }
 
-  if (state.params.filterMode != FilterMode::None &&
-      state.params.filterMode != FilterMode::Grayscale) {
-    if (ImGui::SliderFloat("Intensity", &state.params.channelIntensity, 0.1f,
+  if (state.params.filter.mode != FilterMode::None &&
+      state.params.filter.mode != FilterMode::Grayscale) {
+    if (ImGui::SliderFloat("Intensity", &state.params.filter.channelIntensity,
+                           0.1f,
                            1.0f)) {
       state.needsReprocess = true;
     }
@@ -202,28 +203,28 @@ void ui::draw_parameters_section(AppState &state) {
   ImGui::Text("Quantization");
 
   static const char *quantizeNames[] = {"None", "Uniform Per Channel"};
-  int quantizeMode = (int)state.params.quantizeMode;
+  int quantizeMode = (int)state.params.quantize.mode;
 
   if (ImGui::Combo("Quantize Mode", &quantizeMode, quantizeNames,
                    IM_ARRAYSIZE(quantizeNames))) {
-    state.params.quantizeMode = (QuantizeMode)quantizeMode;
+    state.params.quantize.mode = (QuantizeMode)quantizeMode;
     state.needsReprocess = true;
   }
 
   if (state.lockChannels) {
-    int shared = state.params.levelsR;
+    int shared = state.params.quantize.levelsR;
     if (ImGui::SliderInt("Levels RGB", &shared, 1, 32)) {
-      state.params.levelsR = shared;
-      state.params.levelsG = shared;
-      state.params.levelsB = shared;
+      state.params.quantize.levelsR = shared;
+      state.params.quantize.levelsG = shared;
+      state.params.quantize.levelsB = shared;
       state.needsReprocess = true;
     }
   } else {
-    if (ImGui::SliderInt("Levels R", &state.params.levelsR, 1, 32))
+    if (ImGui::SliderInt("Levels R", &state.params.quantize.levelsR, 1, 32))
       state.needsReprocess = true;
-    if (ImGui::SliderInt("Levels G", &state.params.levelsG, 1, 32))
+    if (ImGui::SliderInt("Levels G", &state.params.quantize.levelsG, 1, 32))
       state.needsReprocess = true;
-    if (ImGui::SliderInt("Levels B", &state.params.levelsB, 1, 32))
+    if (ImGui::SliderInt("Levels B", &state.params.quantize.levelsB, 1, 32))
       state.needsReprocess = true;
   }
   ImGui::Checkbox("Lock Channels", &state.lockChannels);
@@ -232,19 +233,19 @@ void ui::draw_parameters_section(AppState &state) {
   ImGui::Text("Dithering");
 
   static const char *ditherNames[] = {"None", "Ordered"};
-  int ditherMode = (int)state.params.ditherMode;
+  int ditherMode = (int)state.params.dither.mode;
 
   if (ImGui::Combo("Dither Mode", &ditherMode, ditherNames,
                    IM_ARRAYSIZE(ditherNames))) {
-    state.params.ditherMode = (DitherMode)ditherMode;
+    state.params.dither.mode = (DitherMode)ditherMode;
     state.needsReprocess = true;
 
-    if (state.params.quantizeMode == QuantizeMode::None) {
+    if (state.params.quantize.mode == QuantizeMode::None) {
       state.errors.push("You have to select a quantize mode for dithering!");
     }
   }
 
-  if (ImGui::SliderFloat("Dither Strength", &state.params.ditherStrength, 0.0f,
+  if (ImGui::SliderFloat("Dither Strength", &state.params.dither.strength, 0.0f,
                          2.0f))
     state.needsReprocess = true;
 
