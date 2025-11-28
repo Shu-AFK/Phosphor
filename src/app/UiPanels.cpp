@@ -193,8 +193,8 @@ void ui::draw_parameters_section(AppState &state) {
 
   if (state.params.filter.mode != FilterMode::None &&
       state.params.filter.mode != FilterMode::Grayscale) {
-    if (ImGui::SliderFloat("Intensity", &state.params.filter.channelIntensity,
-                           0.1f, 1.0f)) {
+    if (ImGui::SliderFloat("Intensity##filter",
+                           &state.params.filter.channelIntensity, 0.1f, 1.0f)) {
       state.needsReprocess = true;
     }
   }
@@ -210,6 +210,10 @@ void ui::draw_parameters_section(AppState &state) {
     state.needsReprocess = true;
   }
 
+  if (ImGui::SliderFloat("Exposure", &state.params.glow.exposure, 0.1f, 2.0f)) {
+    state.needsReprocess = true;
+  }
+
   if (ImGui::SliderFloat("Threshold", &state.params.glow.threshold, 0.0f,
                          1.0f)) {
     state.needsReprocess = true;
@@ -219,7 +223,7 @@ void ui::draw_parameters_section(AppState &state) {
     state.needsReprocess = true;
   }
 
-  if (ImGui::SliderFloat("Intensity", &state.params.glow.intensity, 0.0f,
+  if (ImGui::SliderFloat("Intensity##glow", &state.params.glow.intensity, 0.0f,
                          4.0f)) {
     state.needsReprocess = true;
   }

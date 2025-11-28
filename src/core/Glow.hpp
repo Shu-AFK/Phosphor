@@ -7,6 +7,7 @@ enum class GlowBlurMode {
 
 struct GlowParams {
   bool enabled = false;
+  float exposure = 1.0f;
   float threshold = 0.8f;
   float radius = 8;
   float intensity = 1.0f;

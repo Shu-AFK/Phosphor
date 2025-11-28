@@ -1,7 +1,34 @@
 #include "Glow.hpp"
 #include "core/ImageF.hpp"
+#include <cmath>
+
+#define GAMMA_IN 2.2
 
 namespace {
+
+void exposure_scaling(const ImageF &src, ImageF &dst, float exposure) {
+  int w = src.width();
+  int h = src.height();
+  int c = src.channels();
+
+  dst = ImageF(w, h, c);
+
+  for (int y = 0; y < h; ++y) {
+    for (int x = 0; x < w; ++x) {
+
+      auto rgba = src.at(x, y);
+
+      for (int ch = 0; ch < c; ++ch) {
+        float v = rgba[ch] / 255.0f;
+        float lin = std::pow(v, 1.0f / GAMMA_IN);
+        lin *= exposure;
+        rgba[ch] = lin * 255.0f;
+      }
+
+      dst.at(x, y) = rgba;
+    }
+  }
+}
 
 void bright_pass_filter(const ImageF &src, ImageF &dst, float threshold) {
   int w = src.width();
@@ -31,5 +58,8 @@ void bright_pass_filter(const ImageF &src, ImageF &dst, float threshold) {
 } // namespace
 
 void apply_glow(const ImageF &src, ImageF &dst, const GlowParams &params) {
-  bright_pass_filter(src, dst, params.threshold);
+  exposure_scaling(src, dst, params.exposure);
+
+  ImageF tmp = dst;
+  bright_pass_filter(tmp, dst, params.threshold);
 }

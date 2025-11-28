@@ -36,3 +36,59 @@ const Vec4f &ImageF::at(int x, int y) const {
   assert(y >= 0 && y < _h);
   return _pixels[static_cast<std::size_t>(y) * _w + x];
 }
+
+float &Vec3f::operator[](int i) {
+  assert(i >= 0 && i < 3);
+  switch (i) {
+  case 0:
+    return r;
+  case 1:
+    return g;
+  default:
+    return b;
+  }
+}
+
+const float &Vec3f::operator[](int i) const {
+  assert(i >= 0 && i < 3);
+  switch (i) {
+  case 0:
+    return r;
+  case 1:
+    return g;
+  default:
+    return b;
+  }
+}
+
+Vec3f Vec3f::operator*(float s) const { return Vec3f{r * s, g * s, b * s}; }
+
+float &Vec4f::operator[](int i) {
+  assert(i >= 0 && i < 4);
+  switch (i) {
+  case 0:
+    return r;
+  case 1:
+    return g;
+  case 2:
+    return b;
+  default:
+    return a;
+  }
+}
+
+const float &Vec4f::operator[](int i) const {
+  assert(i >= 0 && i < 4);
+  switch (i) {
+  case 0:
+    return r;
+  case 1:
+    return g;
+  case 2:
+    return b;
+  default:
+    return a;
+  }
+}
+
+Vec4f Vec4f::operator*(float s) const { return Vec4f{r * s, g * s, b * s, a}; }
