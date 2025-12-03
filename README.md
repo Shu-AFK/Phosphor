@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.svg" width="240" alt="Phosphor logo"/>
+  <img src="assets/logo.png" width="240" alt="Phosphor logo"/>
 </p>
 
 <h1 align="center">Phosphor – Image Effect Suite</h1>
