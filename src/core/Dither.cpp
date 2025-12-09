@@ -30,9 +30,9 @@ inline Vec3f apply_ordered_dither_offset(const Vec3f &c, int levelsR,
   float rangeB = 1.0f / float(levelsB);
 
   Vec3f out;
-  out.r = std::clamp((c.r / 255.0f) + offset * rangeR, 0.0f, 1.0f) * 255.0f;
-  out.g = std::clamp((c.g / 255.0f) + offset * rangeG, 0.0f, 1.0f) * 255.0f;
-  out.b = std::clamp((c.b / 255.0f) + offset * rangeB, 0.0f, 1.0f) * 255.0f;
+  out.r = std::clamp(c.r + offset * rangeR, 0.0f, 1.0f);
+  out.g = std::clamp(c.g + offset * rangeG, 0.0f, 1.0f);
+  out.b = std::clamp(c.b + offset * rangeB, 0.0f, 1.0f);
 
   return out;
 }

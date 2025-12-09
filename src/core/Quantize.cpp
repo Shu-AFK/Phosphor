@@ -4,16 +4,16 @@
 #include <cassert>
 #include <cmath>
 
-// Uniform per-channel quantization:
-// 1. Normalize to [0,1]
+// Uniform per-channel quantization in linear 0..1 space:
+// 1. Clamp to [0,1]
 // 2. Scale to [0, levels-1]
 // 3. Round to nearest bucket
-// 4. Map back to [0,255]
+// 4. Map back to [0,1]
 float quantize_channel_uniform(float val, int levels) {
-  float v = std::clamp(val, 0.0f, 255.0f) / 255.0f;
+  float v = std::clamp(val, 0.0f, 1.0f);
   float scaled = v * float(levels - 1);
   int r = static_cast<int>(std::round(scaled));
-  float out = float(r) * (255.0f / float(levels - 1));
+  float out = float(r) * (1.0f / float(levels - 1));
   return out;
 }
 
