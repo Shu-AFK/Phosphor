@@ -63,6 +63,17 @@ const float &Vec3f::operator[](int i) const {
 
 Vec3f Vec3f::operator*(float s) const { return Vec3f{r * s, g * s, b * s}; }
 
+Vec3f Vec3f::operator+(const Vec3f &o) const {
+  return Vec3f{r + o.r, g + o.g, b + o.b};
+}
+
+Vec3f &Vec3f::operator+=(const Vec3f &o) {
+  r += o.r;
+  g += o.g;
+  b += o.b;
+  return *this;
+}
+
 float &Vec4f::operator[](int i) {
   assert(i >= 0 && i < 4);
   switch (i) {
@@ -92,3 +103,15 @@ const float &Vec4f::operator[](int i) const {
 }
 
 Vec4f Vec4f::operator*(float s) const { return Vec4f{r * s, g * s, b * s, a}; }
+
+Vec4f Vec4f::operator+(const Vec4f &o) const {
+  return Vec4f{r + o.r, g + o.g, b + o.b, a + o.a};
+}
+
+Vec4f &Vec4f::operator+=(const Vec4f &o) {
+  r += o.r;
+  g += o.g;
+  b += o.b;
+  a += o.a;
+  return *this;
+}

@@ -13,6 +13,8 @@ struct Vec3f {
   const float &operator[](int i) const;
 
   Vec3f operator*(float s) const;
+  Vec3f operator+(const Vec3f &o) const;
+  Vec3f &operator+=(const Vec3f &o);
 };
 
 struct Vec4f {
@@ -25,6 +27,8 @@ struct Vec4f {
   const float &operator[](int i) const;
 
   Vec4f operator*(float s) const;
+  Vec4f operator+(const Vec4f &o) const;
+  Vec4f &operator+=(const Vec4f &o);
 };
 
 class ImageF {
