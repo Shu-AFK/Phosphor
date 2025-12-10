@@ -18,16 +18,21 @@ Phosphor is a small desktop tool for experimenting with chunky, quantized image 
 
 - Image load/save through stb wrappers with clear in-UI error reporting.
 - Preview via an OpenGL textured quad with zoom controls (buttons or Ctrl + `=`).
+- Input/output gamma controls to tune the linearization curve and final display tone.
 - Channel filtering (grayscale or isolated R/G/B channels) with intensity adjustment.
+- Glow bloom with exposure/threshold shaping, adjustable radius, and Gaussian or box blur.
 - Uniform per-channel quantization with optional channel locking.
 - Ordered 4×4 Bayer dithering with per-pixel strength control.
 
 ## Processing pipeline
 
-1. **Channel filters** – grayscale mix or isolated RGB channels with adjustable intensity.
-2. **Quantization** – uniform per-channel bucketing (2–32 levels) using `quantize_naive`.
-3. **Ordered dithering** – 4×4 Bayer thresholds applied before final quantization in `quantize_ordered_dither`.
-4. **Upload** – the processed buffer is uploaded to an OpenGL `Texture2D` for preview.
+1. **Linearization** – sRGB input is converted to linear space using an adjustable input gamma.
+2. **Channel filters** – grayscale mix or isolated RGB channels with adjustable intensity.
+3. **Glow (optional)** – bright-pass extraction followed by a separable Gaussian or box blur and additive blend.
+4. **Quantization** – uniform per-channel bucketing (2–32 levels) using `quantize_naive`.
+5. **Ordered dithering** – 4×4 Bayer thresholds applied before final quantization in `quantize_ordered_dither`.
+6. **Output gamma** – linear results are re-encoded to sRGB using an adjustable output gamma.
+7. **Upload** – the processed buffer is uploaded to an OpenGL `Texture2D` for preview.
 
 The entire path is CPU-side for now.
 
@@ -56,7 +61,7 @@ cmake --build build
 
 ### Usage
 - **Load** an image (PNG/JPEG); the chosen file is shown in the header.
-- Adjust filter, quantization, and dithering settings; changes automatically trigger a reprocess.
+- Adjust gamma, color filtering, glow, quantization, and dithering settings; changes automatically trigger a reprocess.
 - Zoom using the UI buttons or hold Ctrl and tap `=` while hovering the preview.
 - **Save** writes the processed buffer back to disk.
 
