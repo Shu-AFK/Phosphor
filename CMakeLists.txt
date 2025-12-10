@@ -32,6 +32,10 @@ add_executable(phosphor
   ${IMGUI_SOURCES}
 )
 
+target_compile_options(phosphor PRIVATE
+  $<$<CONFIG:Release>:-O2>
+)
+
 target_include_directories(phosphor PRIVATE
   ${CMAKE_SOURCE_DIR}/src
   ${IMGUI_DIR}

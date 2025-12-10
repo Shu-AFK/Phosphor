@@ -7,7 +7,9 @@
 
 namespace {
 
-inline int clamp_int(int v, int lo, int hi) { return std::min(std::max(v, lo), hi); }
+inline int clamp_int(int v, int lo, int hi) {
+  return std::min(std::max(v, lo), hi);
+}
 
 struct GlowWorkspace {
   ImageF exposed;
@@ -26,8 +28,6 @@ struct GlowWorkspace {
   }
 };
 
-// Runs bright-pass in linear space after exposure has been applied to the
-// working image.
 void bright_pass_filter(const ImageF &src, ImageF &dst, float threshold) {
   int w = src.width();
   int h = src.height();
@@ -81,7 +81,15 @@ std::vector<float> gen_gaussian_kernel(int radius) {
   return kernel;
 }
 
-void blur_horizontal(const ImageF &src, ImageF &dst, const std::vector<float> &kernel) {
+std::vector<float> gen_box_kernel(int radius) {
+  int r = static_cast<int>(std::ceil(radius));
+  int size = 2 * r + 1;
+  std::vector<float> kernel(size, 1.0f / static_cast<float>(size));
+  return kernel;
+}
+
+void blur_horizontal(const ImageF &src, ImageF &dst,
+                     const std::vector<float> &kernel) {
   int w = src.width();
   int h = src.height();
   int radius = static_cast<int>(kernel.size() / 2);
@@ -103,7 +111,8 @@ void blur_horizontal(const ImageF &src, ImageF &dst, const std::vector<float> &k
   }
 }
 
-void blur_vertical(const ImageF &src, ImageF &dst, const std::vector<float> &kernel) {
+void blur_vertical(const ImageF &src, ImageF &dst,
+                   const std::vector<float> &kernel) {
   int w = src.width();
   int h = src.height();
   int radius = static_cast<int>(kernel.size() / 2);
@@ -125,12 +134,14 @@ void blur_vertical(const ImageF &src, ImageF &dst, const std::vector<float> &ker
   }
 }
 
-void additive_blend(const ImageF &base, const ImageF &glow, ImageF &dst, float intensity) {
+void additive_blend(const ImageF &base, const ImageF &glow, ImageF &dst,
+                    float intensity) {
   int w = base.width();
   int h = base.height();
   int c = base.channels();
 
-  if (!dst.valid() || dst.width() != w || dst.height() != h || dst.channels() != c) {
+  if (!dst.valid() || dst.width() != w || dst.height() != h ||
+      dst.channels() != c) {
     dst = ImageF(w, h, c);
   }
 
@@ -150,8 +161,6 @@ void additive_blend(const ImageF &base, const ImageF &glow, ImageF &dst, float i
 
 } // namespace
 
-// Glow is executed entirely in 0..1 linear space and additively blended onto the
-// base image before gamma encoding back to sRGB.
 void apply_glow(const ImageF &src, ImageF &dst, const GlowParams &params) {
   if (!params.enabled || params.intensity <= 0.0f || params.radius <= 0.0f) {
     dst = src;
@@ -166,6 +175,9 @@ void apply_glow(const ImageF &src, ImageF &dst, const GlowParams &params) {
 
   std::vector<float> kernel;
   switch (params.mode) {
+  case GlowBlurMode::Box:
+    kernel = gen_box_kernel(r);
+    break;
   case GlowBlurMode::Gaussian:
   default:
     kernel = gen_gaussian_kernel(r);
@@ -175,7 +187,6 @@ void apply_glow(const ImageF &src, ImageF &dst, const GlowParams &params) {
   static GlowWorkspace workspace;
   workspace.ensure(src.width(), src.height(), src.channels());
 
-  // Apply exposure in-place into the working buffer to preserve the base image.
   for (int y = 0; y < src.height(); ++y) {
     for (int x = 0; x < src.width(); ++x) {
       const Vec4f &s = src.at(x, y);

@@ -10,4 +10,6 @@ struct Params {
   GlowParams glow;
   QuantizeParams quantize;
   DitherParams dither;
+  float gammaIn = 2.2f;
+  float gammaOut = 2.2f;
 };

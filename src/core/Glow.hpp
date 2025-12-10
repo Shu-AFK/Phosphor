@@ -3,6 +3,7 @@
 #include "core/ImageF.hpp"
 enum class GlowBlurMode {
   Gaussian,
+  Box,
 };
 
 struct GlowParams {

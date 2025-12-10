@@ -40,6 +40,13 @@ bool SliderIntReprocess(const char *label, int *v, int v_min, int v_max,
   return false;
 }
 
+void draw_color_section(AppState &state) {
+  ImGui::Text("Color");
+
+  SliderFloatReprocess("Gamma In", &state.params.gammaIn, 1.0f, 3.0f, state);
+  SliderFloatReprocess("Gamma Out", &state.params.gammaOut, 1.0f, 3.0f, state);
+}
+
 void draw_filter_section(AppState &state) {
   ImGui::Text("Filters");
 
@@ -64,7 +71,7 @@ void draw_filter_section(AppState &state) {
 void draw_glow_section(AppState &state) {
   ImGui::Text("Glow");
 
-  static const char *blurNames[] = {"Gaussian"};
+  static const char *blurNames[] = {"Gaussian", "Box"};
   int blurMode = (int)state.params.glow.mode;
   if (ImGui::Combo("Blur Mode", &blurMode, blurNames,
                    IM_ARRAYSIZE(blurNames))) {
@@ -307,6 +314,9 @@ void ui::draw_preview_section(AppState &state) {
 
 void ui::draw_parameters_section(AppState &state) {
   ImGui::BeginChild("Control Panel");
+
+  draw_color_section(state);
+  ImGui::Separator();
 
   draw_filter_section(state);
   ImGui::Separator();

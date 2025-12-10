@@ -11,11 +11,8 @@
 
 namespace {
 
-constexpr float kGammaIn = 2.2f;
-constexpr float kGammaOut = 2.2f;
-
 // Convert 8-bit sRGB input into 0..1 linear floating point.
-ImageF to_float_image(const Image &src) {
+ImageF to_float_image(const Image &src, float gammaIn) {
   int w = src.width();
   int h = src.height();
   int c = src.channels();
@@ -31,9 +28,9 @@ ImageF to_float_image(const Image &src) {
       float sg = static_cast<float>(source_pixels[idx + 1]) / 255.0f;
       float sb = static_cast<float>(source_pixels[idx + 2]) / 255.0f;
 
-      pixel.r = std::pow(sr, kGammaIn);
-      pixel.g = std::pow(sg, kGammaIn);
-      pixel.b = std::pow(sb, kGammaIn);
+      pixel.r = std::pow(sr, gammaIn);
+      pixel.g = std::pow(sg, gammaIn);
+      pixel.b = std::pow(sb, gammaIn);
       pixel.a = c == 4 ? static_cast<float>(source_pixels[idx + 3]) / 255.0f
                        : 1.0f;
     }
@@ -43,7 +40,7 @@ ImageF to_float_image(const Image &src) {
 }
 
 // Convert 0..1 linear floating point into 8-bit sRGB output.
-Image to_uint8_image(const ImageF &src) {
+Image to_uint8_image(const ImageF &src, float gammaOut) {
   int w = src.width();
   int h = src.height();
   int c = src.channels();
@@ -59,9 +56,9 @@ Image to_uint8_image(const ImageF &src) {
       float lg = std::clamp(pixel.g, 0.0f, 1.0f);
       float lb = std::clamp(pixel.b, 0.0f, 1.0f);
 
-      float sr = std::pow(lr, 1.0f / kGammaOut);
-      float sg = std::pow(lg, 1.0f / kGammaOut);
-      float sb = std::pow(lb, 1.0f / kGammaOut);
+      float sr = std::pow(lr, 1.0f / gammaOut);
+      float sg = std::pow(lg, 1.0f / gammaOut);
+      float sb = std::pow(lb, 1.0f / gammaOut);
 
       destination_pixels[idx] =
           static_cast<uint8_t>(std::round(std::clamp(sr, 0.0f, 1.0f) * 255.0f));
@@ -83,7 +80,7 @@ Image to_uint8_image(const ImageF &src) {
 } // namespace
 
 void run_cpu_pipeline(const Image &src, Image &dst, const Params &params) {
-  ImageF work = to_float_image(src);
+  ImageF work = to_float_image(src, params.gammaIn);
   ImageF scratch(work.width(), work.height(), work.channels());
 
   ImageF *read = &work;
@@ -124,5 +121,5 @@ void run_cpu_pipeline(const Image &src, Image &dst, const Params &params) {
     swap_buffers();
   }
 
-  dst = to_uint8_image(*read);
+  dst = to_uint8_image(*read, params.gammaOut);
 }
