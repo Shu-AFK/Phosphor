@@ -1,12 +1,12 @@
 #pragma once
 
+#include "ColorScheme.hpp"
 #include "Dither.hpp"
-#include "Filter.hpp"
 #include "Glow.hpp"
 #include "Quantize.hpp"
 
 struct Params {
-  FilterParams filter;
+  ColorSchemeParams colorScheme;
   GlowParams glow;
   QuantizeParams quantize;
   DitherParams dither;

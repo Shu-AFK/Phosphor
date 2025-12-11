@@ -2,7 +2,7 @@
 
 #include "Dialog.hpp"
 
-#include "core/Filter.hpp"
+#include "core/ColorScheme.hpp"
 #include "core/Glow.hpp"
 #include "core/ImageIO.hpp"
 #include "core/Params.hpp"
@@ -47,24 +47,44 @@ void draw_color_section(AppState &state) {
   SliderFloatReprocess("Gamma Out", &state.params.gammaOut, 1.0f, 3.0f, state);
 }
 
-void draw_filter_section(AppState &state) {
-  ImGui::Text("Filters");
+void draw_color_scheme_section(AppState &state) {
+  ImGui::Text("Color Scheme");
 
-  static const char *filterNames[] = {"None", "Greyscale", "Red Channel",
-                                      "Green Channel", "Blue Channel"};
-  int filterMode = (int)state.params.filter.mode;
-
-  if (ImGui::Combo("Filter Mode", &filterMode, filterNames,
-                   IM_ARRAYSIZE(filterNames))) {
-    state.params.filter.mode = (FilterMode)filterMode;
+  if (ImGui::Checkbox("Enable Color Scheme", &state.params.colorScheme.enabled)) {
     state.needsReprocess = true;
   }
 
-  if (state.params.filter.mode != FilterMode::None &&
-      state.params.filter.mode != FilterMode::Grayscale) {
-    SliderFloatReprocess("Intensity##filter",
-                         &state.params.filter.channelIntensity, 0.1f, 1.0f,
-                         state);
+  if (state.params.colorScheme.enabled) {
+    if (ImGui::Checkbox("Use Custom Color", &state.params.colorScheme.useCustom)) {
+      state.needsReprocess = true;
+    }
+
+    if (state.params.colorScheme.useCustom) {
+      float color[3] = {state.params.colorScheme.customColor.r,
+                        state.params.colorScheme.customColor.g,
+                        state.params.colorScheme.customColor.b};
+      if (ImGui::ColorEdit3("Custom Color", color)) {
+        state.params.colorScheme.customColor.r = color[0];
+        state.params.colorScheme.customColor.g = color[1];
+        state.params.colorScheme.customColor.b = color[2];
+        state.needsReprocess = true;
+      }
+    } else {
+      if (ImGui::BeginCombo("Preset",
+                            COLOR_PRESETS[state.params.colorScheme.presetIndex].name)) {
+        for (int i = 0; i < COLOR_PRESET_COUNT; ++i) {
+          bool isSelected = (state.params.colorScheme.presetIndex == i);
+          if (ImGui::Selectable(COLOR_PRESETS[i].name, isSelected)) {
+            state.params.colorScheme.presetIndex = i;
+            state.needsReprocess = true;
+          }
+          if (isSelected) {
+            ImGui::SetItemDefaultFocus();
+          }
+        }
+        ImGui::EndCombo();
+      }
+    }
   }
 }
 
@@ -318,7 +338,7 @@ void ui::draw_parameters_section(AppState &state) {
   draw_color_section(state);
   ImGui::Separator();
 
-  draw_filter_section(state);
+  draw_color_scheme_section(state);
   ImGui::Separator();
 
   draw_glow_section(state);

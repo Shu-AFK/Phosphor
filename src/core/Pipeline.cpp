@@ -1,6 +1,6 @@
 #include "Pipeline.hpp"
+#include "ColorScheme.hpp"
 #include "Dither.hpp"
-#include "Filter.hpp"
 #include "Glow.hpp"
 #include "ImageF.hpp"
 #include "Quantize.hpp"
@@ -88,24 +88,8 @@ void run_cpu_pipeline(const Image &src, Image &dst, const Params &params) {
 
   auto swap_buffers = [&]() { std::swap(read, write); };
 
-  switch (params.filter.mode) {
-  case FilterMode::None:
-    break;
-  case FilterMode::Grayscale:
-  case FilterMode::RedChannel:
-  case FilterMode::GreenChannel:
-  case FilterMode::BlueChannel:
-    apply_channel_filter(*read, *write, params.filter.mode,
-                         params.filter.channelIntensity);
-    swap_buffers();
-    break;
-  default:
-    assert(false && "Invalid filter mode");
-    break;
-  }
-
-  if (params.glow.enabled) {
-    apply_glow(*read, *write, params.glow);
+  if (params.colorScheme.enabled) {
+    apply_color_scheme(*read, *write, params.colorScheme);
     swap_buffers();
   }
 
@@ -118,6 +102,11 @@ void run_cpu_pipeline(const Image &src, Image &dst, const Params &params) {
                               params.quantize.levelsR, params.quantize.levelsG,
                               params.quantize.levelsB, params.dither.strength);
     }
+    swap_buffers();
+  }
+
+  if (params.glow.enabled) {
+    apply_glow(*read, *write, params.glow);
     swap_buffers();
   }
 
