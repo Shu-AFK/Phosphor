@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <omp.h>
 #include <vector>
 
 namespace {
@@ -34,6 +35,7 @@ void bright_pass_filter(const ImageF &src, ImageF &dst, float threshold) {
 
   float t = std::clamp(threshold, 0.0f, 0.999f);
 
+#pragma omp parallel for
   for (int y = 0; y < h; ++y) {
     for (int x = 0; x < w; ++x) {
       const Vec4f &rgba = src.at(x, y);
@@ -94,6 +96,7 @@ void blur_horizontal(const ImageF &src, ImageF &dst,
   int h = src.height();
   int radius = static_cast<int>(kernel.size() / 2);
 
+#pragma omp parallel for
   for (int y = 0; y < h; ++y) {
     for (int x = 0; x < w; ++x) {
       Vec4f acc{0.0f, 0.0f, 0.0f, 0.0f};
@@ -117,6 +120,7 @@ void blur_vertical(const ImageF &src, ImageF &dst,
   int h = src.height();
   int radius = static_cast<int>(kernel.size() / 2);
 
+#pragma omp parallel for
   for (int y = 0; y < h; ++y) {
     for (int x = 0; x < w; ++x) {
       Vec4f acc{0.0f, 0.0f, 0.0f, 0.0f};
@@ -145,6 +149,7 @@ void additive_blend(const ImageF &base, const ImageF &glow, ImageF &dst,
     dst = ImageF(w, h, c);
   }
 
+#pragma omp parallel for
   for (int y = 0; y < h; ++y) {
     for (int x = 0; x < w; ++x) {
       const Vec4f &b = base.at(x, y);

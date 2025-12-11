@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <omp.h>
 
 namespace {
 
@@ -21,6 +22,7 @@ ImageF to_float_image(const Image &src, float gammaIn) {
   ImageF out(w, h, c);
   const uint8_t *source_pixels = src.data();
 
+#pragma omp parallel for
   for (int y = 0; y < h; ++y) {
     for (int x = 0; x < w; ++x) {
       int idx = (y * w + x) * c;
@@ -49,6 +51,7 @@ Image to_uint8_image(const ImageF &src, float gammaOut) {
   Image out(w, h, c);
   uint8_t *destination_pixels = out.data();
 
+#pragma omp parallel for
   for (int y = 0; y < h; ++y) {
     for (int x = 0; x < w; ++x) {
       int idx = (y * w + x) * c;

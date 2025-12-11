@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 find_package(OpenGL REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(OpenMP REQUIRED)
 pkg_search_module(GLFW REQUIRED glfw3)
 
 set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/external/imgui)
@@ -49,4 +50,5 @@ target_link_libraries(phosphor PRIVATE
   nfd
   ${GLFW_LIBRARIES}
   OpenGL::GL
+  OpenMP::OpenMP_CXX
 )

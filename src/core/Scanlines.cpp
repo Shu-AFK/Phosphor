@@ -1,10 +1,13 @@
 #include "Scanlines.hpp"
 
+#include <omp.h>
+
 void apply_scanlines(const ImageF &src, ImageF &dst,
                      const ScanlineParams &params) {
   int w = src.width();
   int h = src.height();
 
+#pragma omp parallel for
   for (int y = 0; y < h; ++y) {
     int band = y / params.thickness;
     int bandInCycle = band % (1 + params.spacing);

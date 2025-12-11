@@ -36,7 +36,8 @@ case "$PKG_MANAGER" in
       libxcursor-dev \
       libxi-dev \
       libxxf86vm-dev \
-      libgtk-3-dev
+      libgtk-3-dev \
+      libomp-dev
     ;;
 
   pacman)
@@ -51,7 +52,8 @@ case "$PKG_MANAGER" in
       libxcursor \
       libxi \
       libxxf86vm \
-      gtk3
+      gtk3 \
+      openmp
     ;;
 
   dnf)
@@ -66,7 +68,8 @@ case "$PKG_MANAGER" in
       libXcursor-devel \
       libXi-devel \
       libXxf86vm-devel \
-      gtk3-devel
+      gtk3-devel \
+      libomp-devel
     ;;
 
   zypper)
@@ -81,7 +84,8 @@ case "$PKG_MANAGER" in
       libXcursor-devel \
       libXi-devel \
       libXxf86vm-devel \
-      gtk3-devel
+      gtk3-devel \
+      libomp16-devel
     ;;
 
   brew)
@@ -91,7 +95,8 @@ case "$PKG_MANAGER" in
       pkg-config \
       glfw \
       mesa \
-      gtk+3
+      gtk+3 \
+      libomp
     ;;
 
   *)
