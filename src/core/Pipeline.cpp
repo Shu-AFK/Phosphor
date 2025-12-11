@@ -4,6 +4,7 @@
 #include "Glow.hpp"
 #include "ImageF.hpp"
 #include "Quantize.hpp"
+#include "Scanlines.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -31,8 +32,8 @@ ImageF to_float_image(const Image &src, float gammaIn) {
       pixel.r = std::pow(sr, gammaIn);
       pixel.g = std::pow(sg, gammaIn);
       pixel.b = std::pow(sb, gammaIn);
-      pixel.a = c == 4 ? static_cast<float>(source_pixels[idx + 3]) / 255.0f
-                       : 1.0f;
+      pixel.a =
+          c == 4 ? static_cast<float>(source_pixels[idx + 3]) / 255.0f : 1.0f;
     }
   }
 
@@ -67,9 +68,8 @@ Image to_uint8_image(const ImageF &src, float gammaOut) {
       destination_pixels[idx + 2] =
           static_cast<uint8_t>(std::round(std::clamp(sb, 0.0f, 1.0f) * 255.0f));
       if (c == 4) {
-        destination_pixels[idx + 3] =
-            static_cast<uint8_t>(std::round(std::clamp(pixel.a, 0.0f, 1.0f) *
-                                           255.0f));
+        destination_pixels[idx + 3] = static_cast<uint8_t>(
+            std::round(std::clamp(pixel.a, 0.0f, 1.0f) * 255.0f));
       }
     }
   }
@@ -93,15 +93,21 @@ void run_cpu_pipeline(const Image &src, Image &dst, const Params &params) {
     swap_buffers();
   }
 
-  if (params.quantize.mode != QuantizeMode::None) {
-    if (params.dither.mode == DitherMode::None) {
-      quantize_naive(*read, *write, params.quantize.mode, params.quantize.levelsR,
-                     params.quantize.levelsG, params.quantize.levelsB);
-    } else {
+  if (params.quantize.enabled) {
+    if (params.dither.enabled) {
       quantize_ordered_dither(*read, *write, params.quantize.mode,
                               params.quantize.levelsR, params.quantize.levelsG,
                               params.quantize.levelsB, params.dither.strength);
+    } else {
+      quantize_naive(*read, *write, params.quantize.mode,
+                     params.quantize.levelsR, params.quantize.levelsG,
+                     params.quantize.levelsB);
     }
+    swap_buffers();
+  }
+
+  if (params.scanlines.enabled) {
+    apply_scanlines(*read, *write, params.scanlines);
     swap_buffers();
   }
 

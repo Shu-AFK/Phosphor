@@ -7,7 +7,8 @@ enum class QuantizeMode {
 };
 
 struct QuantizeParams {
-  QuantizeMode mode = QuantizeMode::None;
+  bool enabled = false;
+  QuantizeMode mode = QuantizeMode::UniformPerChannel;
   int levelsR = 4;
   int levelsG = 4;
   int levelsB = 4;

@@ -9,7 +9,8 @@ enum class DitherMode {
 };
 
 struct DitherParams {
-  DitherMode mode = DitherMode::None;
+  bool enabled = false;
+  DitherMode mode = DitherMode::Ordered4x4;
   float strength = 1.0f;
 };
 

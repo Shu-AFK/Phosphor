@@ -91,85 +91,97 @@ void draw_color_scheme_section(AppState &state) {
 void draw_glow_section(AppState &state) {
   ImGui::Text("Glow");
 
-  static const char *blurNames[] = {"Gaussian", "Box"};
-  int blurMode = (int)state.params.glow.mode;
-  if (ImGui::Combo("Blur Mode", &blurMode, blurNames,
-                   IM_ARRAYSIZE(blurNames))) {
-    state.params.glow.mode = (GlowBlurMode)blurMode;
+  if (ImGui::Checkbox("Enable Glow", &state.params.glow.enabled)) {
     state.needsReprocess = true;
   }
 
-  SliderFloatReprocess("Exposure", &state.params.glow.exposure, 0.1f, 2.0f,
-                       state);
-  SliderFloatReprocess("Threshold", &state.params.glow.threshold, 0.0f, 1.0f,
-                       state);
-  SliderFloatReprocess("Radius", &state.params.glow.radius, 1.0f, 40.0f, state);
-  SliderFloatReprocess("Intensity##glow", &state.params.glow.intensity, 0.0f,
-                       4.0f, state);
+  if (state.params.glow.enabled) {
+    static const char *blurNames[] = {"Gaussian", "Box"};
+    int blurMode = (int)state.params.glow.mode;
+    if (ImGui::Combo("Blur Mode", &blurMode, blurNames,
+                     IM_ARRAYSIZE(blurNames))) {
+      state.params.glow.mode = (GlowBlurMode)blurMode;
+      state.needsReprocess = true;
+    }
 
-  if (ImGui::Checkbox("Enable Glow", &state.params.glow.enabled)) {
-    state.needsReprocess = true;
+    SliderFloatReprocess("Exposure", &state.params.glow.exposure, 0.1f, 2.0f,
+                         state);
+    SliderFloatReprocess("Threshold", &state.params.glow.threshold, 0.0f, 1.0f,
+                         state);
+    SliderFloatReprocess("Radius", &state.params.glow.radius, 1.0f, 40.0f, state);
+    SliderFloatReprocess("Intensity##glow", &state.params.glow.intensity, 0.0f,
+                         4.0f, state);
   }
 }
 
 void draw_quantization_section(AppState &state) {
   ImGui::Text("Quantization");
 
-  static const char *quantizeNames[] = {"None", "Uniform Per Channel"};
-  int quantizeMode = (int)state.params.quantize.mode;
-
-  if (ImGui::Combo("Quantize Mode", &quantizeMode, quantizeNames,
-                   IM_ARRAYSIZE(quantizeNames))) {
-    state.params.quantize.mode = (QuantizeMode)quantizeMode;
+  if (ImGui::Checkbox("Enable Quantization", &state.params.quantize.enabled)) {
     state.needsReprocess = true;
   }
 
-  bool wasLocked = state.lockChannels;
+  if (state.params.quantize.enabled) {
+    bool wasLocked = state.lockChannels;
 
-  if (state.lockChannels) {
-    if (SliderIntReprocess("Levels RGB", &state.params.quantize.levelsR, 1, 32,
-                           state)) {
+    if (state.lockChannels) {
+      if (SliderIntReprocess("Levels RGB", &state.params.quantize.levelsR, 1, 32,
+                             state)) {
+        int shared = state.params.quantize.levelsR;
+        state.params.quantize.levelsG = shared;
+        state.params.quantize.levelsB = shared;
+      }
+    } else {
+      SliderIntReprocess("Levels R", &state.params.quantize.levelsR, 1, 32,
+                         state);
+      SliderIntReprocess("Levels G", &state.params.quantize.levelsG, 1, 32,
+                         state);
+      SliderIntReprocess("Levels B", &state.params.quantize.levelsB, 1, 32,
+                         state);
+    }
+
+    ImGui::Checkbox("Lock Channels", &state.lockChannels);
+
+    if (!wasLocked && state.lockChannels) {
       int shared = state.params.quantize.levelsR;
       state.params.quantize.levelsG = shared;
       state.params.quantize.levelsB = shared;
+      state.needsReprocess = true;
     }
-  } else {
-    SliderIntReprocess("Levels R", &state.params.quantize.levelsR, 1, 32,
-                       state);
-    SliderIntReprocess("Levels G", &state.params.quantize.levelsG, 1, 32,
-                       state);
-    SliderIntReprocess("Levels B", &state.params.quantize.levelsB, 1, 32,
-                       state);
-  }
-
-  ImGui::Checkbox("Lock Channels", &state.lockChannels);
-
-  if (!wasLocked && state.lockChannels) {
-    int shared = state.params.quantize.levelsR;
-    state.params.quantize.levelsG = shared;
-    state.params.quantize.levelsB = shared;
-    state.needsReprocess = true;
   }
 }
 
 void draw_dithering_section(AppState &state) {
   ImGui::Text("Dithering");
 
-  static const char *ditherNames[] = {"None", "Ordered"};
-  int ditherMode = (int)state.params.dither.mode;
-
-  if (ImGui::Combo("Dither Mode", &ditherMode, ditherNames,
-                   IM_ARRAYSIZE(ditherNames))) {
-    state.params.dither.mode = (DitherMode)ditherMode;
+  if (ImGui::Checkbox("Enable Dithering", &state.params.dither.enabled)) {
     state.needsReprocess = true;
 
-    if (state.params.quantize.mode == QuantizeMode::None) {
-      state.errors.push("You have to select a quantize mode for dithering!");
+    if (state.params.dither.enabled && !state.params.quantize.enabled) {
+      state.errors.push("You need to enable quantization for dithering!");
     }
   }
 
-  SliderFloatReprocess("Dither Strength", &state.params.dither.strength, 0.0f,
-                       2.0f, state);
+  if (state.params.dither.enabled) {
+    SliderFloatReprocess("Dither Strength", &state.params.dither.strength, 0.0f,
+                         2.0f, state);
+  }
+}
+
+void draw_scanlines_section(AppState &state) {
+  ImGui::Text("Scanlines");
+
+  if (ImGui::Checkbox("Enable Scanlines", &state.params.scanlines.enabled)) {
+    state.needsReprocess = true;
+  }
+
+  if (state.params.scanlines.enabled) {
+    SliderIntReprocess("Thickness", &state.params.scanlines.thickness, 1, 30,
+                       state);
+    SliderIntReprocess("Spacing", &state.params.scanlines.spacing, 1, 5, state);
+    SliderFloatReprocess("Gap Darkness", &state.params.scanlines.gapDarkness,
+                         0.0f, 1.0f, state);
+  }
 }
 } // namespace
 
@@ -348,6 +360,9 @@ void ui::draw_parameters_section(AppState &state) {
   ImGui::Separator();
 
   draw_dithering_section(state);
+  ImGui::Separator();
+
+  draw_scanlines_section(state);
 
   ImGui::EndChild();
 }
